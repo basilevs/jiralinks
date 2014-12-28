@@ -4,7 +4,7 @@
 // @description Adds backlinks from Gerrit to JIRA
 // @include     https://git.eclipse.org/*
 // @include		https://hudson.eclipse.org/rcptt/*job/rcptt-all-gerrit/
-// @version     2
+// @version     3
 // @grant       GM_getValue
 // @grant       GM_setValue
 // @grant       GM_log
@@ -51,7 +51,7 @@ function getOnly(array) {
 function getNode(expression, parent) {
 	var array = getNodes(expression, parent);
 	if (array.length != 1)
-		throw new Error("There are " + array.length + " elements of "+expression+" :" + array);
+		throw new Error("There are " + array.length + " elements of "+parent.outerHTML.substr(0, 500)+" :" + array);
 	return array[0];
 }
 
@@ -66,6 +66,22 @@ GM_log("Location: " + document.location + ", referer: " + document.referrer + ",
 
 var hudsonLinks = deserialize("hudsonLinks", {});
 
+
+function updateGerritInformation(gerritUrl) {
+	var jiraLink = jiraLinks[gerritUrl];
+	if (jiraLink) {
+		GM_log("JIRA link: " + jiraLink);
+		extendChangeInformation("JIRA", getIssueNumberFromLink(jiraLink), jiraLink);
+	}
+	if (gerritUrl) {
+		var hudsonLink = hudsonLinks[gerritUrl];
+		GM_log("Hudson link: " + hudsonLink);
+		if (hudsonLink)
+			extendChangeInformation("Hudson", extractJobId(hudsonLink), hudsonLink);
+	}
+}
+
+
 if (normalizeGerritUrl(location.href)) {
 	var jiraLinks = deserialize("jiraLinks", {});
 	var gerritUrl = normalizeGerritUrl(location.href);
@@ -73,21 +89,15 @@ if (normalizeGerritUrl(location.href)) {
 		jiraLinks[normalizeGerritUrl(location.href)] = document.referrer;
 		serialize("jiraLinks", jiraLinks);
 	}
-	var jiraLink = jiraLinks[gerritUrl];
-	if (jiraLink) {
-		GM_log("JIRA link: " + jiraLink);
-		window.addEventListener('load', function() {
-			extendChangeInformation("JIRA", getIssueNumberFromLink(jiraLink), jiraLink);
-		});
+	function onGerritChange() {
+		GM_log("Mutated");
+		var gerritLink = normalizeGerritUrl(location.href);
+		if (gerritLink)
+			updateGerritInformation(gerritLink);
 	}
-	if (gerritUrl) {
-		var hudsonLink = hudsonLinks[gerritUrl];
-		GM_log("Hudson link: " + hudsonLink);
-		if (hudsonLink)
-			window.addEventListener('load', function() {
-				extendChangeInformation("Hudson", extractJobId(hudsonLink), hudsonLink);
-			});
-	}
+	window.addEventListener ("hashchange", onGerritChange,  false);
+	window.addEventListener('load', onGerritChange, false);
+	
 } else if (document.location.href.contains("/job/")) {
 	window.addEventListener('load', function() {
 		var log = "";
@@ -143,7 +153,6 @@ function addJiraLink(jiraLink) {
 function extendChangeInformation(field, name, link) {
 	var infoTable = getNode(changeInfoXpath);
 	var row = document.createElement("tr");
-	var issue = getIssueNumberFromLink(jiraLink);
 	if (name && link)
 		value = '<a href="'+link +'">'+name+'</a>';
 	else 
