@@ -4,7 +4,7 @@
 // @description Adds backlinks from Gerrit to JIRA
 // @include     https://git.eclipse.org/*
 // @include		https://hudson.eclipse.org/rcptt/*job/rcptt-all-gerrit/
-// @version     3
+// @version     4
 // @grant       GM_getValue
 // @grant       GM_setValue
 // @grant       GM_log
@@ -12,7 +12,6 @@
 
 //GM_log = function (data) {};
 
-var gerritHrefReg = /https:\/\/git.eclipse.org\/r\/#\/c\/(\d+)\//;
 var changeInfoXpath = './/table[@class="infoBlock changeInfoBlock"]/tbody';
 var jiraLinkReg = /https:\/\/[\w\.]+\/browse\/([^\/ #\?]+)(\/.*)?/;
 var hudsonLinkReg = /https:\/\/(.*)(?:\/view\/\w+)?\/job\/([\w\-]+)\/(\d+)\/?/;
@@ -82,7 +81,7 @@ function updateGerritInformation(gerritUrl) {
 }
 
 
-if (normalizeGerritUrl(location.href)) {
+if (location.href.contains("/r/")) {
 	var jiraLinks = deserialize("jiraLinks", {});
 	var gerritUrl = normalizeGerritUrl(location.href);
 	if (getIssueNumberFromLink(document.referrer)) {
