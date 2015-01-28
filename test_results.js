@@ -16,10 +16,14 @@ if (!isNaN(buildNum)) {
 	var url = link.href.replace("lastBuild", ""+buildNum);
 	var tasks = document.getElementById('tasks');
 
-	if (getNodes("//table[contains(@class, 'progress-bar')]").length == 0) {
+	function appendDiv(innerHtml) {
 		var div = document.createElement("div");
-		div.innerHTML = "<img style='margin: 2px;' src='/rcptt/static/f580e051/images/24x24/clipboard.png'> <a href='" + url +"artifact/rcpttTests/target/results/tests.html'>RCPTT Report</a>";
+		div.innerHTML = innerHtml;
 		tasks.appendChild(div);
+	}
+	if (getNodes("//table[contains(@class, 'progress-bar')]").length == 0) {
+		appendDiv("<img style='margin: 2px;' src='/rcptt/static/f580e051/images/24x24/clipboard.png'> <a href='" + url +"artifact/rcpttTests/target/results/tests.html'>RCPTT Report</a>");
+		appendDiv("<img style='margin: 2px;' src='/rcptt/static/f580e051/images/24x24/terminal.png'> <a href='" + url +"artifact/rcpttTests/target/results/aut-console-0_console.log'>AUT консоль</a>");
 	}
 }
 
