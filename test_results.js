@@ -4,7 +4,7 @@
 // @include     https://hudson.eclipse.org/rcptt*/job/rcptt-all-gerrit/*
 // @include     https://hudson.eclipse.org/rcptt*/job/rcptt-tests/*
 // @require		https://github.com/basilevs/jiralinks/raw/master/utils.js	
-// @version     1
+// @version     2
 // @grant       GM_log
 // ==/UserScript==
 
