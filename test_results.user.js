@@ -16,12 +16,17 @@ var jobToTestPath = {
 };
 
 
-var link = getNode("(id('left-top-nav')/a)[last()]");
-var jobName = getNode("(id('left-top-nav')/a)[last()-1]").textContent;
+var link = getNode("id('left-top-nav')/a[contains(text(), '#')]");
 
+var jobLink = getPreviousSibling(link, "a");
+var jobName = "Bad job";
+if (jobLink) {
+	GM_log("Found: " + jobLink.outerHTML);
+	jobName = jobLink.textContent;
+}
 var buildNum = parseInt(link.textContent.replace(/#/g, ""), 10);
 var path = jobToTestPath[jobName];
-GM_log("No path for job " + jobName + ": " + path);
+GM_log("Path for job " + jobName + ": " + path);
 GM_log("Build number: " + buildNum);
 
 if (!isNaN(buildNum) && path) {

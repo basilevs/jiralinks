@@ -38,3 +38,14 @@ function getNode(expression, parent) {
 	}
 	return array[0];
 }
+
+function getPreviousSibling(start, type) {
+	while (start) {
+		start = start.previousSibling;
+		if (!start)
+			return null;
+		if (start.localName == type)
+			return start;
+	}
+	return null;
+}
