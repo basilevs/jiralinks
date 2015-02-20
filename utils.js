@@ -30,7 +30,11 @@ function getOnly(array) {
 
 function getNode(expression, parent) {
 	var array = getNodes(expression, parent);
-	if (array.length != 1)
-		throw new Error("There are " + array.length + " elements of "+parent.outerHTML.substr(0, 500)+" :" + array);
+	if (array.length != 1) {
+		var descr = "None";
+		if (parent)
+			descr = parent.outerHTML.substr(0, 500)
+		throw new Error("There are " + array.length + " elements of "+descr+" :" + array + ", for expression: " + expression);
+	}
 	return array[0];
 }

@@ -5,7 +5,7 @@
 // @include     https://git.eclipse.org/*
 // @include		https://hudson.eclipse.org/rcptt/*job/rcptt-all-gerrit/
 // @require		https://github.com/basilevs/jiralinks/raw/master/utils.js
-// @version     5
+// @version     6
 // @grant       GM_getValue
 // @grant       GM_setValue
 // @grant       GM_log
@@ -13,7 +13,7 @@
 
 //GM_log = function (data) {};
 
-var changeInfoXpath = './/table[@class="infoBlock changeInfoBlock"]/tbody';
+var changeInfoXpath = "id('change_infoTable')/tbody";
 var jiraLinkReg = /https:\/\/[\w\.]+\/browse\/([^\/ #\?]+)(\/.*)?/;
 var hudsonLinkReg = /https:\/\/(.*)(?:\/view\/\w+)?\/job\/([\w\-]+)\/(\d+)\/?/;
 
@@ -35,14 +35,13 @@ function updateGerritInformation(gerritUrl) {
 		GM_log("JIRA link: " + jiraLink);
 		extendChangeInformation("JIRA", getIssueNumberFromLink(jiraLink), jiraLink);
 	}
-	if (gerritUrl) {
-		var hudsonLink = hudsonLinks[gerritUrl];
-		GM_log("Hudson link: " + hudsonLink);
-		if (hudsonLink)
-			extendChangeInformation("Hudson", extractJobId(hudsonLink), hudsonLink);
-	}
 }
 
+function wrapInTimeout(delegate, delay) {
+	return function () {
+		window.setTimeout(delegate, delay);
+	};
+}
 
 if (location.href.contains("/r/")) {
 	var jiraLinks = deserialize("jiraLinks", {});
@@ -57,31 +56,8 @@ if (location.href.contains("/r/")) {
 		if (gerritLink)
 			updateGerritInformation(gerritLink);
 	}
-	window.addEventListener ("hashchange", onGerritChange,  false);
-	window.addEventListener('load', onGerritChange, false);
-	
-} else if (document.location.href.contains("/job/")) {
-	window.addEventListener('load', function() {
-		var log = "";
-		var present = {};
-		extractBuildHistory(function (hudsonUrl, gerritUrl) {
-			if (present[gerritUrl])
-				return;
-			present[gerritUrl] = true;
-			gerritUrl = normalizeGerritUrl(gerritUrl);
-			hudsonLinks[gerritUrl] = hudsonUrl;
-			log+=(gerritUrl + " : " + hudsonUrl + "\n");
-		});
-		serialize("hudsonLinks", hudsonLinks);
-		GM_log("Found history: \n" + log);
-	});
-}
-
-function extractJobId(hudsonUrl) {
-	var res = hudsonLinkReg.exec(hudsonUrl)
-	if (!res) 
-		throw new Error(hudsonUrl + " is not a hudson link");
-	return res[2] + "/" + res[3];
+	window.addEventListener ("hashchange", wrapInTimeout(onGerritChange, 1000),  false);
+	window.addEventListener('load', wrapInTimeout(onGerritChange, 2000), false);
 }
 
 function normalizeGerritUrl(gerritUrl) {
@@ -94,33 +70,20 @@ function normalizeGerritUrl(gerritUrl) {
 	return "https://"+res[1]+"/r/" + res[2] + "/";
 }
 
-
-
-function extractBuildHistory(callback) {
-	var rows = getNodes("id('buildHistory')//tr[contains(@class, 'build-row no-wrap')]");
-	for(var i in rows) {
-		var row = rows[i];
-		var hudsonUrl = getNode("td[2]/a", row).href;
-		var gerritCell = getNode("td[4]/a", row);
-		var gerritUrl = gerritCell.href;
-		callback(hudsonUrl, gerritUrl);
-	}
-	return history;	
-}
-
 function addJiraLink(jiraLink) {
 	return extendChangeInformation("JIRA", getIssueNumberFromLink(jiraLink), jiraLink);
 }
 
 function extendChangeInformation(field, name, link) {
 	var infoTable = getNode(changeInfoXpath);
+	var lastRow = getNode("tr[last()]", infoTable);
 	var row = document.createElement("tr");
 	if (name && link)
 		value = '<a href="'+link +'">'+name+'</a>';
 	else 
 		value = 'None';
-	row.innerHTML = '<td class="header">'+field+'</td><td>'+value+'</td>';
+	row.innerHTML = '<th>'+field+'</th><td>'+value+'</td>';
+	infoTable.insertBefore(row, lastRow);
 
-	infoTable.appendChild(row);
 }
 
