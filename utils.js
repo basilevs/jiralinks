@@ -1,5 +1,9 @@
 function deserialize(name, def) {
-	return eval(GM_getValue(name, (def || '({})')));
+	def = (def || '({})');
+	var rv =  eval(GM_getValue(name, def));
+	if (!rv)
+		return def;
+	return rv;
 }
 
 function serialize(name, val) {
