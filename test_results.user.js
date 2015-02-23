@@ -20,11 +20,11 @@ var jobToTestPath = {
 function normalizeJobUrl(url) {
 // Possible form: https://hudson.eclipse.org/rcptt/view/active/job/rcptt-all-gerrit/556/
 // Normal form: https://hudson.eclipse.org/rcptt/job/rcptt-all-gerrit/
-	var exp = /(.*)(?:\/view\/[^\/]+)?\/job\/([^\/]+)\/.*/;
+	var exp = /(.*)(?:\/view\/[^\/]+)?\/job\/([^\/]+)\/(\d+).*/;
 	var res = exp.exec(url);
 	if (!res)
 		return null;
-	return res[1]+"/job/"+res[2]+"/";
+	return res[1]+"/job/"+res[2]+"/"+res[3];
 }
 
 function normalizeGerritUrl(gerritUrl) {
@@ -121,7 +121,7 @@ if (!isNaN(buildNum) && path) {
 		createDiv('/rcptt/static/f580e051/images/24x24/clipboard.png', url +"target/results/tests.html", "RCPTT Report");
 	createDiv('/rcptt/static/f580e051/images/24x24/terminal.png', url + "target/results/aut-console-0_console.log", "AUT консоль");
 	if (gerritLink)
-		createDiv('/rcptt/plugin/gerrit-trigger/images/icon16.png', url +"target/results/aut-console-0_console.log", "Change");
+		createDiv('/rcptt/plugin/gerrit-trigger/images/icon16.png', gerritLink, "Change");
 	
 	
 	
