@@ -5,7 +5,7 @@
 // @include     https://hudson.eclipse.org/rcptt*/job/rcptt-tests/*
 // @include     https://hudson.eclipse.org/rcptt*/job/mockups-tests/*
 // @require		https://github.com/basilevs/jiralinks/raw/master/utils.js	
-// @version     5
+// @version     6
 // @grant       GM_log
 // @grant       GM_getValue
 // @grant       GM_setValue
@@ -13,6 +13,7 @@
 
 var jobToTestPath = {
 	"rcptt-tests": "rcpttTests",
+	"rcptt-mars": "rcpttTests",
 	"rcptt-all-gerrit": "rcpttTests",
 	"mockups-tests": "tests"
 };
